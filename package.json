@@ -1,0 +1,26 @@
+{
+  "name": "socketio-gobang",
+  "version": "1.0.0",
+  "description": "基于socket.io的双人对战五子棋。",
+  "main": "socketServer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XNAL/socketio-gobang.git"
+  },
+  "keywords": [
+    "socket.io",
+    "gobang"
+  ],
+  "author": "Don",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/XNAL/socketio-gobang/issues"
+  },
+  "homepage": "https://github.com/XNAL/socketio-gobang#readme",
+  "dependencies": {
+    "socket.io": "^2.0.3"
+  }
+}

@@ -1,0 +1,12 @@
+h2.title {
+    font-size: 30px;
+    line-height: 50px;
+    text-align: center;
+}
+canvas {
+    display: block;
+    margin: 50px auto;
+    /* border: 1px solid #eee; */
+    background: rgba(240, 194, 135, .9);
+    box-shadow: -2px -2px 2px #efefef, 5px 5px 5px #bcbcbc;
+}
