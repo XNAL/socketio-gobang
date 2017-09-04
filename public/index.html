@@ -5,14 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/index.css">
     <title>Document</title>
 </head>
 
 <body>
     <h2 class="title">五子棋对战</h2>
-    <div class="board">
-        <canvas id="chessboard"></canvas>
+    <div class="main-body">
+        <div class="board">
+            <div class="user-name">
+                <span>昵称：</span>
+                <input type="text" value="" id="my_name">
+                <button id="change_name">修改昵称</button>
+            </div>
+            <canvas id="chessboard"></canvas>
+        </div>
+        <div class="onine-user">
+            <p class="onine-title">在线用户</p>
+            <div id="user_list"></div>
+        </div>
     </div>
     <script src="./lib/jquery.min.js"></script>
     <script src="./lib/socket.io.js"></script>

@@ -12,9 +12,33 @@ var ctx = null;
 var arrPieces = new Array();
 
 $(document).ready(function () {
-    // var socket = io('http://localhost:3000');
+    var socket = io('http://localhost:3000');
     drawChessBoard();
     chessClick();
+
+    socket.on('userName', function (name) {
+        $('#my_name').val(name).attr('data-oldvalue', name);
+    });
+
+    socket.on('allUsers', function (userList) {
+        var strList = '';
+        $.each(userList, function (index, value) {
+            strList += '<p data-id="' + value.id + '" data-name="' + value.name + '">' + value.name + '</p>';
+        });
+        $('#user_list').html(strList);
+    });
+
+    $('#change_name').click(function (e) {
+        var $name = $('#my_name'),
+            value = $name.val();
+        if (value.trim() === '') {
+            alert('昵称不能为空！');
+            return;
+        }
+        if (value !== $name.attr('data-oldvalue')) {
+            socket.emit('setName', value);
+        }
+    })
 });
 
 // 画出棋盘

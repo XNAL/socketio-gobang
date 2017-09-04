@@ -1,6 +1,19 @@
+body {
+    min-width: 800px;
+}
+.main-body {
+    position: relative;
+    margin-top: 20px;
+}
 h2.title {
     font-size: 30px;
     line-height: 50px;
+    text-align: center;
+}
+.board {
+    margin-right: 350px;
+}
+.user-name {
     text-align: center;
 }
 canvas {
@@ -9,4 +22,22 @@ canvas {
     /* border: 1px solid #eee; */
     background: rgba(240, 194, 135, .9);
     box-shadow: -2px -2px 2px #efefef, 5px 5px 5px #bcbcbc;
+}
+.onine-user {
+    position: absolute;
+    top: 0;
+    right: 20px;
+    width: 250px;    
+}
+.onine-title {
+    text-align: center;
+    line-height: 20px;
+    font-size: 14px;
+}
+#user_list {
+    height: 480px;
+    padding: 10px;
+    line-height: 20px;
+    overflow-y: scroll;
+    border: 1px solid #ddd;
 }
