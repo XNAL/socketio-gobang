@@ -1,9 +1,7 @@
-body {
-    min-width: 800px;
-}
 .main-body {
     position: relative;
-    margin-top: 20px;
+    margin: 20px auto;
+    width: 750px;
 }
 h2.title {
     font-size: 30px;
@@ -18,7 +16,7 @@ h2.title {
 }
 canvas {
     display: block;
-    margin: 50px auto;
+    margin: 20px auto;
     /* border: 1px solid #eee; */
     background: rgba(240, 194, 135, .9);
     box-shadow: -2px -2px 2px #efefef, 5px 5px 5px #bcbcbc;
@@ -31,13 +29,37 @@ canvas {
 }
 .onine-title {
     text-align: center;
-    line-height: 20px;
+    line-height: 1;
     font-size: 14px;
+    margin-bottom: 20px;
 }
 #user_list {
-    height: 480px;
-    padding: 10px;
+    height: 440px;
+    padding: 0 10px;
     line-height: 20px;
     overflow-y: scroll;
     border: 1px solid #ddd;
+}
+
+.user-item {
+    overflow: hidden;
+    margin: 5px 0;
+}
+
+.user-info {
+    float: left;
+}
+
+.user-status {
+    float: right;
+    padding: 0 10px;
+    cursor: pointer;
+}
+
+.gaming-status {
+    background: red;
+}
+
+.gaming-current {
+    background: green;
 }

@@ -4,6 +4,7 @@ var CHESSBOARD_MARGIN = 15; // 棋盘内边距
 var chessSize = 0; // 棋盘格数
 var isBlack = true; // 是否黑棋
 var isGameOver = false; // 游戏是否结束
+var isCanStep = false; // 是否可以下棋（对手下棋时己方不能下棋）
 
 // 设置canvas的content的
 var ctx = null;
@@ -13,32 +14,12 @@ var arrPieces = new Array();
 
 $(document).ready(function () {
     var socket = io('http://localhost:3000');
+    clientSocket(socket);
+    bindChangeNameClick(socket);
+    bindApplyGameClick(socket);
+
     drawChessBoard();
     chessClick();
-
-    socket.on('userName', function (name) {
-        $('#my_name').val(name).attr('data-oldvalue', name);
-    });
-
-    socket.on('allUsers', function (userList) {
-        var strList = '';
-        $.each(userList, function (index, value) {
-            strList += '<p data-id="' + value.id + '" data-name="' + value.name + '">' + value.name + '</p>';
-        });
-        $('#user_list').html(strList);
-    });
-
-    $('#change_name').click(function (e) {
-        var $name = $('#my_name'),
-            value = $name.val();
-        if (value.trim() === '') {
-            alert('昵称不能为空！');
-            return;
-        }
-        if (value !== $name.attr('data-oldvalue')) {
-            socket.emit('setName', value);
-        }
-    })
 });
 
 // 画出棋盘
@@ -69,7 +50,7 @@ function drawChessBoard() {
 // 画出棋子
 function drawPiece(i, j) {
     // 当前游戏未结束且当前节点未落子
-    if (!isGameOver && arrPieces[i][j] === 0) {
+    if (isCanStep && !isGameOver && arrPieces[i][j] === 0) {
         x = CHESSBOARD_MARGIN + i * CHESSBOARD_GRID + 1;
         y = CHESSBOARD_MARGIN + j * CHESSBOARD_GRID + 1;
         ctx.beginPath();
@@ -244,4 +225,64 @@ function upObliqueCheck(x, y) {
         j--;
     }
     isOver(x, y, sum);
+}
+
+function clientSocket(socket) {
+    socket.on('userName', function (name) {
+        $('#my_name').val(name).attr('data-oldvalue', name);
+    });
+
+    socket.on('allUsers', function (userList) {
+        handlebarsUserList(userList, socket.id, socket);
+    });
+
+    socket.on('beginGame', function(gameInfo) {
+        console.log(gameInfo);
+    });
+}
+
+function bindChangeNameClick(socket) {
+    $('#change_name').click(function (e) {
+        var $name = $('#my_name'),
+            value = $name.val();
+        if (value.trim() === '') {
+            alert('昵称不能为空！');
+            return;
+        }
+        if (value !== $name.attr('data-oldvalue')) {
+            socket.emit('setName', value);
+        }
+    });
+}
+
+function bindApplyGameClick(socket) {
+    $('.user-status').click(function (e) {
+        var competitorId = $(this).data('id');
+        console.log('competitorId', competitorId);
+        socket.emit('applyGame', competitorId);
+    });
+}
+
+function handlebarsUserList(userList, ownId, socket) {
+    var source = $("#user_template").html();
+    var template = Handlebars.compile(source);
+    var result = [];
+    $.each(userList, function (index, value) {
+        value.statusClass = '';
+        value.statusText = '申请对战';
+        if (value.competitor) {
+            value.statusClass = 'gaming-status';
+            value.statusText = '对战中';
+        }
+        if (value.competitor === ownId) {
+            value.statusClass = 'gaming-current';
+            value.statusText = '当前对手';
+        }
+        result.push(value);
+    });
+    var html = template({
+        userList: result
+    });
+    $('#user_list').html(html);
+    bindApplyGameClick(socket);
 }

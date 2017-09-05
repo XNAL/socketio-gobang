@@ -26,8 +26,17 @@
             <div id="user_list"></div>
         </div>
     </div>
+    <script id="user_template" type="text/x-handlebars-template">
+        {{#each userList}}
+        <div class="user-item">
+            <p class="user-info">{{name}}</p>
+            <button class="user-status {{statusClass}}" data-id="{{id}}">{{statusText}}</button>
+        </div>
+        {{/each}}
+    </script>
     <script src="./lib/jquery.min.js"></script>
     <script src="./lib/socket.io.js"></script>
+    <script src="./lib/handlebars.js"></script>
     <script src="./js/index.js"></script>
 </body>
 
