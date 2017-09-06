@@ -9,11 +9,11 @@ var isCanStep = false; // 是否可以下棋（对手下棋时己方不能下棋
 // 设置canvas的content的
 var ctx = null;
 
+var socket = io('http://localhost:3000');
 // 棋盘坐标数组
 var arrPieces = new Array();
 
 $(document).ready(function () {
-    var socket = io('http://localhost:3000');
     clientSocket(socket);
     bindChangeNameClick(socket);
     bindApplyGameClick(socket);
@@ -51,24 +51,9 @@ function drawChessBoard() {
 function drawPiece(i, j) {
     // 当前游戏未结束且当前节点未落子
     if (isCanStep && !isGameOver && arrPieces[i][j] === 0) {
-        x = CHESSBOARD_MARGIN + i * CHESSBOARD_GRID + 1;
-        y = CHESSBOARD_MARGIN + j * CHESSBOARD_GRID + 1;
-        ctx.beginPath();
-        ctx.arc(x, y, Math.floor(CHESSBOARD_GRID / 2) - 2, 0, Math.PI * 2, true);
-        ctx.closePath();
-        var grd = ctx.createRadialGradient(x, y, Math.floor(CHESSBOARD_GRID / 3), x, y, Math.floor(CHESSBOARD_GRID / 10));
-        if (isBlack) {
-            grd.addColorStop(0, '#0A0A0A');
-            grd.addColorStop(1, '#676767');
-        } else {
-            grd.addColorStop(0, '#D8D8D8');
-            grd.addColorStop(1, '#F9F9F9');
-        }
-        ctx.fillStyle = grd;
-        ctx.fill();
 
-        // 记录坐标落子情况
-        arrPieces[i][j] = isBlack ? 1 : 2;
+        // 画一个新棋子
+        drawNewPiece(i, j, isBlack);
 
         // 落下棋子后进行检查
         doCheck(i, j, isBlack);
@@ -76,9 +61,31 @@ function drawPiece(i, j) {
         // 检查是否还有空位
         checkIsExistEmpty();
 
+        stepPiece(i, j, isGameOver);
         // 黑白棋相互交换落子
-        isBlack = !isBlack;
+        // isBlack = !isBlack;
     }
+}
+
+function drawNewPiece(i, j, isBlack) {
+    var x = CHESSBOARD_MARGIN + i * CHESSBOARD_GRID + 1;
+    var y = CHESSBOARD_MARGIN + j * CHESSBOARD_GRID + 1;
+    ctx.beginPath();
+    ctx.arc(x, y, Math.floor(CHESSBOARD_GRID / 2) - 2, 0, Math.PI * 2, true);
+    ctx.closePath();
+    var grd = ctx.createRadialGradient(x, y, Math.floor(CHESSBOARD_GRID / 3), x, y, Math.floor(CHESSBOARD_GRID / 10));
+    if (isBlack) {
+        grd.addColorStop(0, '#0A0A0A');
+        grd.addColorStop(1, '#676767');
+    } else {
+        grd.addColorStop(0, '#D8D8D8');
+        grd.addColorStop(1, '#F9F9F9');
+    }
+    ctx.fillStyle = grd;
+    ctx.fill();
+
+    // 记录坐标落子情况
+    arrPieces[i][j] = isBlack ? 1 : 2;
 }
 
 // 点击棋盘进行落子
@@ -233,11 +240,29 @@ function clientSocket(socket) {
     });
 
     socket.on('allUsers', function (userList) {
+        console.log(userList);
         handlebarsUserList(userList, socket.id, socket);
     });
 
-    socket.on('beginGame', function(gameInfo) {
-        console.log(gameInfo);
+    socket.on('beginGame', function (gameInfo) {
+        isCanStep = gameInfo.currentStep;
+        isBlack = gameInfo.isBlack;
+    });
+
+    socket.on('competitorStep', function (info) {
+        var ownInfo = info.ownInfo,
+            stepInfo = info.stepInfo;
+
+        isCanStep = ownInfo.currentStep;
+        console.log('!ownInfo.isBlack', !ownInfo.isBlack, isBlack);
+        drawNewPiece(stepInfo.x, stepInfo.y, !ownInfo.isBlack);
+        isGameOver = stepInfo.isGameOver;
+        console.log('isGameOver', isGameOver);
+        if(isGameOver) {
+            setTimeout(function(){
+                alert('Game Over!');
+            }, 0);
+        }
     });
 }
 
@@ -278,11 +303,22 @@ function handlebarsUserList(userList, ownId, socket) {
             value.statusClass = 'gaming-current';
             value.statusText = '当前对手';
         }
-        result.push(value);
+        if (value.id !== ownId) {
+            result.push(value);
+        }
     });
     var html = template({
         userList: result
     });
     $('#user_list').html(html);
     bindApplyGameClick(socket);
+}
+
+function stepPiece(x, y, isGameOver) {
+    isCanStep = false;
+    socket.emit('step', {
+        x: x,
+        y: y,
+        isGameOver: isGameOver
+    });
 }

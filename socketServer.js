@@ -11,7 +11,8 @@ io.on('connection', function (socket) {
     socketMaps[socket.id] = {
         name: userName,
         competitor: '',
-        currentStep: false
+        currentStep: false,
+        isBlack: false
     };
     socket.emit('userName', userName);
     io.emit('allUsers', getAllUsers());
@@ -30,11 +31,24 @@ io.on('connection', function (socket) {
 
         if (parseInt(Math.random() * 100 + 1, 10) % 2 === 0) {
             socketMaps[applyId].currentStep = true;
+            socketMaps[applyId].isBlack = true;
         } else {
             socketMaps[competitorId].currentStep = true;
+            socketMaps[competitorId].isBlack = true;
         }
-        socket.to(applyId).emit('beginGame', socketMaps[applyId]);
-        socket.to(competitorId).emit('beginGame', socketMaps[competitorId]);
+        io.to(applyId).emit('beginGame', socketMaps[applyId]);
+        io.to(competitorId).emit('beginGame', socketMaps[competitorId]);
+        io.emit('allUsers', getAllUsers());
+    });
+
+    socket.on('step', function(stepInfo) {
+        let competitorId = socketMaps[socket.id].competitor;
+        let competitor = socketMaps[competitorId];
+        competitor.currentStep = true;
+        io.to(competitorId).emit('competitorStep', {
+            ownInfo: competitor,
+            stepInfo: stepInfo
+        })
     });
 
     socket.on('disconnect', function () {
