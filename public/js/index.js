@@ -1,10 +1,11 @@
 var CHESSBOARD_WIDTH = 450; // 棋盘大小
 var CHESSBOARD_GRID = 30; // 棋盘每格大小
 var CHESSBOARD_MARGIN = 15; // 棋盘内边距
-var chessSize = 0; // 棋盘格数
-var isBlack = true; // 是否黑棋
-var isGameOver = false; // 游戏是否结束
-var isCanStep = false; // 是否可以下棋（对手下棋时己方不能下棋）
+var CHESS_SIZE = 0; // 棋盘格数
+var IS_BLACK = true; // 是否黑棋
+var IS_GAME_OVER = false; // 游戏是否结束
+var IS_CAN_STEP = false; // 是否可以下棋（对手下棋时己方不能下棋）
+var COMPETITOR_NAME = '';    // 对手的昵称
 
 // 设置canvas的content的
 var ctx = null;
@@ -29,9 +30,9 @@ function drawChessBoard() {
     canvas.height = CHESSBOARD_WIDTH;
     ctx = canvas.getContext('2d');
     ctx.lineWidth = 1;
-    chessSize = Math.floor(CHESSBOARD_WIDTH / CHESSBOARD_GRID);
+    CHESS_SIZE = Math.floor(CHESSBOARD_WIDTH / CHESSBOARD_GRID);
 
-    for (var i = 0; i < chessSize; i++) {
+    for (var i = 0; i < CHESS_SIZE; i++) {
         ctx.strokeStyle = '#444';
         ctx.moveTo(CHESSBOARD_MARGIN + CHESSBOARD_GRID * i, CHESSBOARD_MARGIN);
         ctx.lineTo(CHESSBOARD_MARGIN + CHESSBOARD_GRID * i, CHESSBOARD_WIDTH - CHESSBOARD_MARGIN);
@@ -41,7 +42,7 @@ function drawChessBoard() {
         ctx.stroke();
 
         arrPieces[i] = new Array();
-        for (var j = 0; j < chessSize; j++) {
+        for (var j = 0; j < CHESS_SIZE; j++) {
             arrPieces[i][j] = 0;
         }
     }
@@ -50,20 +51,20 @@ function drawChessBoard() {
 // 画出棋子
 function drawPiece(i, j) {
     // 当前游戏未结束且当前节点未落子
-    if (isCanStep && !isGameOver && arrPieces[i][j] === 0) {
+    if (IS_CAN_STEP && !IS_GAME_OVER && arrPieces[i][j] === 0) {
 
         // 画一个新棋子
-        drawNewPiece(i, j, isBlack);
+        drawNewPiece(i, j, IS_BLACK);
 
         // 落下棋子后进行检查
-        doCheck(i, j, isBlack);
+        doCheck(i, j, IS_BLACK);
 
         // 检查是否还有空位
         checkIsExistEmpty();
 
-        stepPiece(i, j, isGameOver);
+        stepPiece(i, j, IS_GAME_OVER);
         // 黑白棋相互交换落子
-        // isBlack = !isBlack;
+        // IS_BLACK = !IS_BLACK;
     }
 }
 
@@ -100,8 +101,8 @@ function chessClick() {
 // 检查棋牌中是否还存在空位
 function checkIsExistEmpty() {
     var isExistEmpty = false;
-    for (var i = 0; i < chessSize; i++) {
-        for (var j = 0; j < chessSize; j++) {
+    for (var i = 0; i < CHESS_SIZE; i++) {
+        for (var j = 0; j < CHESS_SIZE; j++) {
             if (arrPieces[i][j] === 0) {
                 isExistEmpty = true;
                 break;
@@ -125,7 +126,7 @@ function doCheck(x, y) {
 // 游戏结束
 function isOver(x, y, sum) {
     if (sum === 5) {
-        isGameOver = true;
+        IS_GAME_OVER = true;
         setTimeout(function () {
             alert('Game Over!')
         }, 0);
@@ -144,11 +145,11 @@ function horizontalCheck(x, y) {
             break;
         }
     }
-    for (var i = x; i < chessSize; i++) {
+    for (var i = x; i < CHESS_SIZE; i++) {
         if (arrPieces[i][y] === arrPieces[x][y]) {
             sum++;
         } else {
-            i = chessSize;
+            i = CHESS_SIZE;
             break;
         }
     }
@@ -167,11 +168,11 @@ function verticalCheck(x, y) {
             break;
         }
     }
-    for (var j = y; j < chessSize; j++) {
+    for (var j = y; j < CHESS_SIZE; j++) {
         if (arrPieces[x][j] === arrPieces[x][y]) {
             sum++;
         } else {
-            j = chessSize;
+            j = CHESS_SIZE;
             break;
         }
     }
@@ -192,11 +193,11 @@ function downObliqueCheck(x, y) {
         i--;
         j--;
     }
-    for (var i = x, j = y; i < chessSize && j < chessSize;) {
+    for (var i = x, j = y; i < CHESS_SIZE && j < CHESS_SIZE;) {
         if (arrPieces[i][j] === arrPieces[x][y]) {
             sum++;
         } else {
-            j = i = chessSize;
+            j = i = CHESS_SIZE;
             break;
         }
         i++;
@@ -209,22 +210,22 @@ function downObliqueCheck(x, y) {
 function upObliqueCheck(x, y) {
     var sum = -1;
 
-    for (var i = x, j = y; i >= 0 && j < chessSize;) {
+    for (var i = x, j = y; i >= 0 && j < CHESS_SIZE;) {
         if (arrPieces[i][j] === arrPieces[x][y]) {
             sum++;
         } else {
-            j = chessSize;
+            j = CHESS_SIZE;
             i = -1;
             break;
         }
         i--;
         j++;
     }
-    for (var i = x, j = y; i < chessSize && j >= 0;) {
+    for (var i = x, j = y; i < CHESS_SIZE && j >= 0;) {
         if (arrPieces[i][j] === arrPieces[x][y]) {
             sum++;
         } else {
-            i = chessSize;
+            i = CHESS_SIZE;
             j = -1;
             break;
         }
@@ -234,6 +235,7 @@ function upObliqueCheck(x, y) {
     isOver(x, y, sum);
 }
 
+// 客户端socket
 function clientSocket(socket) {
     socket.on('userName', function (name) {
         $('#my_name').val(name).attr('data-oldvalue', name);
@@ -245,27 +247,44 @@ function clientSocket(socket) {
     });
 
     socket.on('beginGame', function (gameInfo) {
-        isCanStep = gameInfo.currentStep;
-        isBlack = gameInfo.isBlack;
+        IS_CAN_STEP = gameInfo.currentStep;
+        IS_BLACK = gameInfo.isBlack;
+        var status = '';
+        if(IS_CAN_STEP) {
+            status = '该我下棋了...';
+        } else {
+            status = '等待 ' + COMPETITOR_NAME + ' 下棋中...';
+        }
+        setGameStatus(status);
     });
 
     socket.on('competitorStep', function (info) {
         var ownInfo = info.ownInfo,
             stepInfo = info.stepInfo;
 
-        isCanStep = ownInfo.currentStep;
-        console.log('!ownInfo.isBlack', !ownInfo.isBlack, isBlack);
+        IS_CAN_STEP = ownInfo.currentStep;
         drawNewPiece(stepInfo.x, stepInfo.y, !ownInfo.isBlack);
-        isGameOver = stepInfo.isGameOver;
-        console.log('isGameOver', isGameOver);
-        if(isGameOver) {
+        IS_GAME_OVER = stepInfo.isGameOver;
+        var status = '';
+        if(IS_GAME_OVER) {
             setTimeout(function(){
                 alert('Game Over!');
             }, 0);
+
+            satus = '游戏结束了。';
+        } else {
+            if(IS_CAN_STEP) {
+                status = '该我下棋了...';
+            } else {
+                status = '等待 ' + COMPETITOR_NAME + ' 下棋中...';
+            }
         }
+        setGameStatus(status);
+        
     });
 }
 
+// 绑定修改昵称事件
 function bindChangeNameClick(socket) {
     $('#change_name').click(function (e) {
         var $name = $('#my_name'),
@@ -280,14 +299,16 @@ function bindChangeNameClick(socket) {
     });
 }
 
+// 绑定申请对战事件
 function bindApplyGameClick(socket) {
     $('.user-status').click(function (e) {
-        var competitorId = $(this).data('id');
-        console.log('competitorId', competitorId);
-        socket.emit('applyGame', competitorId);
+        var $this = $(this);
+        socket.emit('applyGame', $this.data('id'));
+        COMPETITOR_NAME = $this.data('name');
     });
 }
 
+// 加载在线用户列表
 function handlebarsUserList(userList, ownId, socket) {
     var source = $("#user_template").html();
     var template = Handlebars.compile(source);
@@ -302,6 +323,7 @@ function handlebarsUserList(userList, ownId, socket) {
         if (value.competitor === ownId) {
             value.statusClass = 'gaming-current';
             value.statusText = '当前对手';
+            COMPETITOR_NAME = value.name;
         }
         if (value.id !== ownId) {
             result.push(value);
@@ -314,11 +336,22 @@ function handlebarsUserList(userList, ownId, socket) {
     bindApplyGameClick(socket);
 }
 
+// 下棋触发socket
 function stepPiece(x, y, isGameOver) {
-    isCanStep = false;
+    IS_CAN_STEP = false;
+    var status = '等待 ' + COMPETITOR_NAME + ' 下棋中...';
+    if(isGameOver) {
+        status = '游戏结束.'
+    }
+    setGameStatus(status);
     socket.emit('step', {
         x: x,
         y: y,
         isGameOver: isGameOver
     });
+}
+
+// 设置游戏状态
+function setGameStatus(status) {
+    $('#current_status').text(status);
 }
