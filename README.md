@@ -28,6 +28,6 @@ node.js + socket.io + js + canvas
 
 ## 项目截图
 
-<img src="https://github.com/XNAL/ReadMore/blob/master/screenshorts/gobang.png"/>
+<img src="https://github.com/XNAL/socketio-gobang/blob/master/screenshorts/gobang.png"/>
 
 
